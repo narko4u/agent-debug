@@ -18,6 +18,13 @@ from .utils import generate_trace_id, current_iso_timestamp, Timer, estimate_tok
 from .schema import validate_trace, validate_step_data
 from .replay import ReplayEngine
 from .export import export_to_html
+from .license import (
+    assert_tracing_allowed,
+    assert_export_allowed,
+    increment_usage,
+    get_watermark_html,
+    check_trial,
+)
 
 F = TypeVar("F", bound=Callable[..., Any])
 
@@ -98,6 +105,10 @@ class TraceInspector:
         metadata: Optional[Dict[str, Any]] = None,
         model: Optional[str] = None,
     ):
+        # Check trial before allowing trace capture
+        assert_tracing_allowed()
+        increment_usage()
+
         self._trace: Dict[str, Any] = {
             "trace_id": trace_id or generate_trace_id(),
             "agent_name": agent_name,

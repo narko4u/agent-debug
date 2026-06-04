@@ -265,17 +265,17 @@ AgentDebug/
 
 ## Pricing
 
+**$95 one-time. No subscriptions. No per-seat fees.**
+
 | Tier | Price | Features |
 |------|-------|----------|
-| **Free** | $0 | 100 debug sessions/mo, local replay, CLI + Dashboard, HTML export, full MIT SDK |
-| **Pro** | $99/seat/mo | Unlimited sessions, cloud storage, team sharing, 90-day retention, priority support |
-| **Enterprise** | $499/seat/mo | Everything in Pro + SSO, on-prem, unlimited retention, SLA, audit logs |
+| **Try Free** | $0 | 50 trace runs, full @trace + TraceInspector, replay forward/back, CLI, trial watermark |
+| **AgentDebug SDK** | **$95** | **Unlimited tracing, HTML/JSON export, no watermark, all future updates** |
 
-## License
+⚡ Try it 50 times for free. If you like it, buy once ($95) and own it forever.
+License key delivered instantly after purchase — activate with `agent-debug activate <key>`.
 
-The AgentDebug SDK is **MIT licensed**. Free to use, modify, and distribute.
-
-The cloud service (Pro & Enterprise tiers) is a separate subscription.
+[Buy on Gumroad →](https://empirelabs1.gumroad.com/l/agent-debug)
 
 ---
 

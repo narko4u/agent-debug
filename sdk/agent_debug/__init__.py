@@ -29,19 +29,33 @@ from .replay import ReplayEngine
 from .schema import validate_trace, SchemaValidationError
 from .export import export_to_html
 from .utils import generate_trace_id, current_iso_timestamp, Timer
+from .license import (
+    LicenseError,
+    is_licensed,
+    activate_license,
+    check_trial,
+    format_trial_status,
+    reset_trial,
+)
 
 __all__ = [
     "trace",
     "TraceInspector",
     "ReplayEngine",
     "load_trace",
-    "list_traces",
-    "validate_trace",
     "SchemaValidationError",
-    "export_to_html",
+    "ReplayEngine",
+    "list_traces",
+    "load_trace",
     "generate_trace_id",
     "current_iso_timestamp",
     "Timer",
+    "LicenseError",
+    "is_licensed",
+    "activate_license",
+    "check_trial",
+    "format_trial_status",
+    "reset_trial",
 ]
 
 __version__ = "0.1.0"

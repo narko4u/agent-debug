@@ -7,6 +7,8 @@ that displays a trace in a readable, step-by-step format.
 import json
 from typing import Any, Dict, List, Optional
 
+from .license import assert_export_allowed, get_watermark_html, check_trial, is_licensed
+
 
 HTML_TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
@@ -170,6 +172,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     }});
   }});
 </script>
+  {watermark_html}
 </body>
 </html>"""
 
@@ -185,6 +188,8 @@ def export_to_html(trace: Dict[str, Any], output_path: Optional[str] = None) -> 
     Returns:
         The HTML content as a string.
     """
+    assert_export_allowed()
+
     metadata = trace.get("metadata", {})
     steps = trace.get("steps", [])
     total_duration_ms = metadata.get("total_duration_ms", 0)
@@ -277,6 +282,7 @@ def export_to_html(trace: Dict[str, Any], output_path: Optional[str] = None) -> 
         total_tool_calls=total_tool_calls,
         token_count=metadata.get("token_count", 0),
         steps_html=steps_html,
+        watermark_html=get_watermark_html(),
     )
 
     if output_path:

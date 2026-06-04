@@ -22,6 +22,10 @@ from agent_debug import (
     ReplayEngine,
     list_traces,
     export_to_html,
+    activate_license,
+    format_trial_status,
+    check_trial,
+    is_licensed,
 )
 
 
@@ -236,6 +240,26 @@ def cmd_export(args: argparse.Namespace) -> None:
         sys.exit(1)
 
 
+def cmd_activate(args: argparse.Namespace) -> None:
+    """Activate AgentDebug with a license key."""
+    if activate_license(args.key):
+        print(f"✓ AgentDebug activated successfully — all features unlocked.")
+    else:
+        print(f"✗ Activation failed. Please check your license key.")
+        sys.exit(1)
+
+
+def cmd_status(args: argparse.Namespace) -> None:
+    """Show trial/license status."""
+    print()
+    print(f"  AgentDebug License Status")
+    print(f"  {'='*40}")
+    print(f"  {format_trial_status()}")
+    if not is_licensed():
+        trial = check_trial()
+        print(f"  Purchase: https://empirelabs1.gumroad.com/l/agent-debug ($95)")
+
+
 def _truncate(text: str, max_len: int) -> str:
     """Truncate text for display."""
     if len(text) <= max_len:
@@ -247,12 +271,14 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="AgentDebug CLI — Agent Execution Inspector & Replay",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
+        epilog="""\
 Examples:
   agent-debug replay trace.json          Interactive replay
   agent-debug inspect trace.json         Summary view
   agent-debug list                       List all traces
   agent-debug export trace.json --html   Export to HTML
+  agent-debug status                     Show license/trial status
+  agent-debug activate <key>             Unlock full SDK ($95 one-time)\
         """,
     )
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
@@ -279,6 +305,13 @@ Examples:
     export_parser.add_argument("--output", "-o", help="Output HTML path")
     export_parser.add_argument("--html", action="store_true", help="Export to HTML format", default=True)
 
+    # Activate command
+    activate_parser = subparsers.add_parser("activate", help="Activate with license key (unlocks exports)")
+    activate_parser.add_argument("key", help="License key from Gumroad purchase")
+
+    # Status command
+    status_parser = subparsers.add_parser("status", help="Show trial/license status")
+
     args = parser.parse_args()
 
     if args.command == "replay":
@@ -289,6 +322,10 @@ Examples:
         cmd_list(args)
     elif args.command == "export":
         cmd_export(args)
+    elif args.command == "activate":
+        cmd_activate(args)
+    elif args.command == "status":
+        cmd_status(args)
     else:
         parser.print_help()
 
