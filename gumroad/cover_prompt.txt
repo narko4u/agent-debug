@@ -1,0 +1,10 @@
+# AgentDebug Gumroad Cover Image Prompt
+
+## Primary Cover (Thumbnail)
+A dark, futuristic dashboard interface with a glowing magnifying glass overlaid on a timeline of agent execution steps. The UI shows a debugger paused at step 23, with visible tool call data and thought bubbles. Deep navy background (#0B0D1A) with electric indigo (#6366F1) and cyan (#22D3EE) accents. Minimal text: "AgentDebug" in bold modern font at top, "Agent Execution Inspector + Replay" smaller below. The interface should show orange "Thinking" labels, blue "Tool Call" labels, and green "Output" labels in a vertical timeline. A small "Step 23/47" indicator visible. Dark terminal aesthetic — no light mode. 1280x720px PNG, max 5MB.
+
+## Secondary Cover (Alternative)
+Split view: left side shows Python code with the @trace decorator highlighted in cyan on dark background. Right side shows the visual replay dashboard with a step highlighted. The bond between them is a glowing arrow from the decorator to the trace output. "AgentDebug" logo top center. Dark theme throughout.
+
+## Logo/Badge (64×64)
+A simple magnifying glass icon with a gear inside the lens. No text. Dark background with cyan/indigo lines.

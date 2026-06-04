@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0B0D1A; color: #E2E4F0; line-height: 1.6; padding: 20px; }
+  .container { max-width: 800px; margin: 0 auto; }
+  h1 { color: #6366F1; font-size: 1.8em; margin-bottom: 8px; }
+  h2 { color: #22D3EE; font-size: 1.3em; margin: 28px 0 12px; border-bottom: 1px solid #2A2D3E; padding-bottom: 6px; }
+  h3 { color: #A5B4FC; font-size: 1.1em; margin: 20px 0 8px; }
+  .hero { text-align: center; padding: 40px 20px; background: linear-gradient(135deg, #131627 0%, #1A1D2E 100%); border-radius: 12px; margin-bottom: 24px; border: 1px solid #6366F1; }
+  .hero h1 { font-size: 2.2em; }
+  .hero .tagline { color: #8B8FA3; font-size: 1.1em; margin-top: 8px; }
+  .price-badge { display: inline-block; background: #1E3A5F; color: #22D3EE; padding: 4px 12px; border-radius: 20px; font-size: 0.9em; font-weight: 700; margin-top: 12px; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 0.75em; font-weight: 700; text-transform: uppercase; }
+  .badge-free { background: #1E5F3A; color: #6EE7B7; }
+  .badge-pro { background: #312E81; color: #A5B4FC; }
+  .badge-enterprise { background: #5B2E1E; color: #FDBA74; }
+  .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 16px 0; }
+  .feature-card { background: #131627; border: 1px solid #2A2D3E; border-radius: 8px; padding: 14px; }
+  .feature-card .icon { font-size: 1.3em; margin-bottom: 4px; }
+  .feature-card h4 { color: #6366F1; font-size: 0.95em; margin-bottom: 4px; }
+  .feature-card p { color: #8B8FA3; font-size: 0.85em; }
+  .pricing-table { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 16px 0; }
+  .pricing-card { background: #131627; border: 1px solid #2A2D3E; border-radius: 8px; padding: 20px; text-align: center; }
+  .pricing-card.featured { border-color: #6366F1; background: #1A1D2E; }
+  .pricing-card .tier { font-size: 0.85em; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+  .pricing-card .price { font-size: 1.6em; font-weight: 700; color: #22D3EE; margin: 8px 0; }
+  .pricing-card .price-sub { font-size: 0.8em; color: #8B8FA3; }
+  .pricing-card ul { list-style: none; text-align: left; font-size: 0.85em; color: #94A3B8; }
+  .pricing-card ul li { padding: 4px 0; }
+  .pricing-card ul li::before { content: "✓ "; color: #34D399; }
+  code { background: #1A1D2E; color: #22D3EE; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; font-family: 'SF Mono', 'Fira Code', monospace; }
+  pre { background: #0A0C18; border-radius: 6px; padding: 14px; overflow-x: auto; font-size: 0.85em; font-family: 'SF Mono', 'Fira Code', monospace; color: #E2E4F0; margin: 12px 0; border: 1px solid #2A2D3E; }
+  .footer { margin-top: 40px; color: #8B8FA3; font-size: 0.85em; text-align: center; border-top: 1px solid #2A2D3E; padding-top: 20px; }
+  .footer a { color: #6366F1; text-decoration: none; }
+  @media (max-width: 600px) { .pricing-table { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="hero">
+  <h1>🔍 AgentDebug</h1>
+  <p class="tagline">Agent Execution Inspector &amp; Replay SDK</p>
+  <p style="color:#8B8FA3;font-size:0.9em;margin-top:4px;">Open-core agent debugging — from decorator to replay in one line</p>
+  <div style="margin-top:12px;"><span class="badge badge-free">Free</span> <span class="badge badge-pro">Pro $99</span> <span class="badge badge-enterprise">Enterprise $499</span></div>
+  <div style="margin-top:8px;font-size:0.85em;color:#8B8FA3;"><a href="https://github.com/narko4u/agent-debug" style="color:#6366F1;">github.com/narko4u/agent-debug</a> · MIT License</div>
+</div>
+
+<h2>💀 The Problem</h2>
+<p>AI agents are a black box. When they fail — and they will — you have no idea <em>why</em>. Was it a bad search result? A hallucinated thought? A tool call with the wrong arguments? LangSmith locks you into LangChain. Langfuse gives you dashboards, not debuggers. Nobody offers "turn back time and see exactly what the agent was thinking at step 23."</p>
+
+<h2>✅ The Solution</h2>
+<p><strong>AgentDebug</strong> is an open-source SDK that instruments any agent — LangChain, CrewAI, AutoGen, custom — and captures a structured <strong>execution trace</strong> of every thought, tool call, and decision. Then replays it step-by-step, forward and backward, so you can inspect exactly what happened and why.</p>
+
+<div class="feature-grid">
+  <div class="feature-card">
+    <div class="icon">🎯</div>
+    <h4>Any Framework</h4>
+    <p>Works with LangChain, CrewAI, AutoGen, custom agents. No lock-in.</p>
+  </div>
+  <div class="feature-card">
+    <div class="icon">⏪</div>
+    <h4>Step Back in Time</h4>
+    <p>Replay forward/backward through the trace. Jump to any step. See the full agent state at any point.</p>
+  </div>
+  <div class="feature-card">
+    <div class="icon">🛠</div>
+    <h4>Tool Call Inspection</h4>
+    <p>Every tool call captured — arguments, results, duration, error state. No more guessing what was sent to the search API.</p>
+  </div>
+  <div class="feature-card">
+    <div class="icon">🧩</div>
+    <h4>Subagent State</h4>
+    <p>Capture full subagent state snapshots. See what each subagent was thinking and doing at every step.</p>
+  </div>
+  <div class="feature-card">
+    <div class="icon">🌐</div>
+    <h4>HTML Export</h4>
+    <p>Export any trace as a self-contained HTML report. Share with your team, attach to bug reports.</p>
+  </div>
+  <div class="feature-card">
+    <div class="icon">⌨️</div>
+    <h4>CLI + Dashboard</h4>
+    <p>Inspect traces from the terminal or the browser. Choose your tool. No build step needed.</p>
+  </div>
+</div>
+
+<h2>🚀 Quick Start</h2>
+<pre>pip install agent-debug
+
+# Decorate any agent function
+from agent_debug import trace
+
+@trace
+def my_agent(prompt):
+    # Your agent logic here
+    return result
+
+# Or use the context manager for fine-grained control
+from agent_debug import TraceInspector
+
+with TraceInspector("my_agent") as inspector:
+    inspector.log_step(1, "thinking", {"input": prompt})
+    inspector.log_tool_call(1, "search", {"q": query}, results)
+    inspector.log_output(final_result)
+    inspector.save("trace.json")
+
+# Replay in the terminal
+agent-debug replay trace.json
+# Step: [Enter]=next, b=back, v=inspect, s=summary, q=quit
+
+# Export as HTML report
+agent-debug export trace.json --html</pre>
+
+<h2>📦 What's Included</h2>
+<ul style="color:#94A3B8;padding-left:20px;">
+  <li><strong>AgentDebug SDK</strong> — Python package with <code>@trace</code> decorator, <code>TraceInspector</code> context manager, trace schema validation, replay engine, and HTML export</li>
+  <li><strong>AgentDebug CLI</strong> — Terminal-based trace inspector with interactive replay, summary view, and HTML export</li>
+  <li><strong>AgentDebug Dashboard</strong> — Browser-based visual trace inspector with step-by-step replay, timeline view, and statistics. Opens directly from the filesystem — no server required</li>
+  <li><strong>Example code</strong> — Basic usage patterns and LangChain integration example</li>
+  <li><strong>Full documentation</strong> — API reference, architecture guide, and integration recipes</li>
+</ul>
+
+<h2>📊 Pricing</h2>
+<div class="pricing-table">
+  <div class="pricing-card">
+    <div class="tier" style="color:#6EE7B7;">Free</div>
+    <div class="price">$0</div>
+    <div class="price-sub">per developer</div>
+    <ul>
+      <li>100 debug sessions/month</li>
+      <li>Local-only replay</li>
+      <li>CLI + Dashboard</li>
+      <li>HTML export</li>
+      <li>Full MIT SDK</li>
+    </ul>
+  </div>
+  <div class="pricing-card featured">
+    <div class="tier" style="color:#A5B4FC;">Pro</div>
+    <div class="price">$99</div>
+    <div class="price-sub">per seat / month</div>
+    <ul>
+      <li>Unlimited debug sessions</li>
+      <li>Cloud trace storage</li>
+      <li>Team sharing &amp; collaboration</li>
+      <li>Custom retention (90 days)</li>
+      <li>Priority support</li>
+    </ul>
+  </div>
+  <div class="pricing-card">
+    <div class="tier" style="color:#FDBA74;">Enterprise</div>
+    <div class="price">$499</div>
+    <div class="price-sub">per seat / month</div>
+    <ul>
+      <li>Everything in Pro</li>
+      <li>SSO / SAML</li>
+      <li>On-prem deployment</li>
+      <li>Custom retention (unlimited)</li>
+      <li>Dedicated support SLA</li>
+      <li>Audit logs &amp; compliance</li>
+    </ul>
+  </div>
+</div>
+
+<h2>🔧 Technical Highlights</h2>
+<ul style="color:#94A3B8;padding-left:20px;">
+  <li><strong>Schema-validated traces</strong> — Every trace is validated against a strict JSON schema. No corrupt data, no silent failures.</li>
+  <li><strong>Step-level inspection</strong> — View input, thought, tool calls, subagent state per step. Everything the agent saw and did.</li>
+  <li><strong>Variable inspection at any point</strong> — Jump to any step and inspect the full agent context. See what variables were in scope.</li>
+  <li><strong>Token cost tracking</strong> — Automatic token counting per trace. Know the cost of every agent run.</li>
+  <li><strong>Framework-agnostic</strong> — Works with any agent library or custom implementation. No dependencies beyond Python 3.9+.</li>
+  <li><strong>Cross-platform</strong> — Python 3.9-3.12, Linux, macOS, Windows. Single-file dashboard works in any browser.</li>
+</ul>
+
+<h2>🏢 Built by Empire Labs</h2>
+<p style="color:#94A3B8;">AgentDebug is developed and maintained by <strong>Empire Labs Pty Ltd</strong>. We build practical, security-first tools for the AI agent ecosystem. <a href="https://empirelabs.com.au" style="color:#6366F1;">empirelabs.com.au</a></p>
+
+<div class="footer">
+  <p>AgentDebug — <a href="https://github.com/narko4u/agent-debug">GitHub</a> · <a href="https://empirelabs1.gumroad.com/l/agent-debug">Gumroad</a> · <a href="https://empirelabs.com.au">Empire Labs</a></p>
+  <p style="margin-top:8px;">SDK: MIT License · Cloud Service: Subscription</p>
+</div>
+
+</div>
+</body>
+</html>

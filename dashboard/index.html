@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgentDebug Dashboard — Trace Inspector</title>
+<style>
+  :root {
+    --bg: #0B0D1A;
+    --surface: #131627;
+    --surface2: #1A1D2E;
+    --border: #2A2D3E;
+    --text: #E2E4F0;
+    --text2: #8B8FA3;
+    --accent: #6366F1;
+    --accent2: #22D3EE;
+    --green: #34D399;
+    --red: #F87171;
+    --yellow: #FBBF24;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 0;
+  }
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header h1 { color: var(--accent); font-size: 1.3em; }
+  .header-actions { display: flex; gap: 8px; align-items: center; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+  label { color: var(--text2); font-size: 0.9em; display: block; margin-bottom: 4px; }
+  select, input, button {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.9em;
+  }
+  select { min-width: 200px; }
+  button {
+    background: var(--accent);
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: opacity 0.2s;
+  }
+  button:hover { opacity: 0.85; }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-sm { padding: 4px 10px; font-size: 0.85em; }
+  .btn-cyan { background: var(--accent2); color: #0B0D1A; }
+  .btn-green { background: var(--green); color: #0B0D1A; }
+  .trace-selector { margin-bottom: 20px; }
+  .meta-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+  .meta-panel h2 { color: var(--accent2); font-size: 1em; margin-bottom: 8px; }
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 8px;
+  }
+  .meta-item .value { font-weight: 700; font-size: 1.1em; }
+  .meta-item .label { font-size: 0.8em; color: var(--text2); }
+  .replay-controls {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .replay-controls .progress {
+    color: var(--text2);
+    font-size: 0.9em;
+    margin-left: auto;
+  }
+  .step-viewer {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    min-height: 300px;
+    margin-bottom: 20px;
+  }
+  .step-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    color: var(--text2);
+    font-size: 1.1em;
+  }
+  .step-header {
+    padding: 12px 16px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .step-body { padding: 16px; }
+  .phase-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75em;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .phase-thinking { background: #312E81; color: #A5B4FC; }
+  .phase-tool_call { background: #1E3A5F; color: #7DD3FC; }
+  .phase-deciding { background: #5B2E1E; color: #FDBA74; }
+  .phase-output { background: #1E5F3A; color: #6EE7B7; }
+  .thought-box {
+    background: var(--surface2);
+    border-radius: 6px;
+    padding: 12px;
+    margin: 8px 0;
+    border-left: 3px solid var(--accent);
+  }
+  .tool-call-box {
+    background: var(--surface2);
+    border-radius: 6px;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid var(--border);
+  }
+  .tool-call-box .name { color: var(--accent2); font-weight: 600; }
+  .tool-call-box .duration { color: var(--text2); font-size: 0.85em; }
+  pre {
+    background: #0A0C18;
+    border-radius: 4px;
+    padding: 8px;
+    overflow-x: auto;
+    font-size: 0.85em;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    color: var(--text);
+    margin-top: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  details summary { cursor: pointer; color: var(--text2); font-size: 0.9em; }
+  details summary:hover { color: var(--accent); }
+  .empty-state { text-align: center; padding: 40px; color: var(--text2); }
+  .empty-state .icon { font-size: 3em; margin-bottom: 12px; }
+  .tab-bar { display: flex; gap: 0; margin-bottom: 0; }
+  .tab {
+    padding: 8px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    cursor: pointer;
+    color: var(--text2);
+    font-size: 0.9em;
+  }
+  .tab.active { background: var(--surface); color: var(--accent); font-weight: 600; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  input[type="file"] { display: none; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🔍 AgentDebug — Trace Inspector</h1>
+  <div class="header-actions">
+    <label for="traceFile" style="cursor:pointer;color:var(--accent2);font-size:0.9em;">
+      📂 Open Trace File
+    </label>
+    <input type="file" id="traceFile" accept=".json">
+  </div>
+</div>
+
+<div class="container">
+  <!-- Trace selector -->
+  <div class="trace-selector">
+    <label>Recent Traces</label>
+    <select id="traceSelect" style="width:100%;">
+      <option value="">No traces loaded. Click "Open Trace File" to begin.</option>
+    </select>
+  </div>
+
+  <!-- Meta panel -->
+  <div id="metaPanel" class="meta-panel" style="display:none;">
+    <h2 id="metaTitle">Trace Summary</h2>
+    <div class="meta-grid" id="metaGrid"></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tab-bar">
+    <div class="tab active" data-tab="replay">Replay</div>
+    <div class="tab" data-tab="timeline">Timeline</div>
+    <div class="tab" data-tab="summary">Summary</div>
+  </div>
+
+  <!-- Tab: Replay -->
+  <div id="tab-replay" class="tab-content active">
+    <div class="replay-controls">
+      <button id="btnFirst" class="btn-sm" disabled>⏮ First</button>
+      <button id="btnBack" class="btn-sm" disabled>◀ Back</button>
+      <button id="btnForward" class="btn-sm btn-cyan" disabled>Forward ▶</button>
+      <button id="btnLast" class="btn-sm btn-cyan" disabled>Last ⏭</button>
+      <span>Step: <input type="number" id="stepInput" value="1" min="1" style="width:60px;text-align:center;"></span>
+      <button id="btnGo" class="btn-sm btn-green" disabled>Go</button>
+      <span class="progress" id="progressText">0 / 0</span>
+    </div>
+    <div class="step-viewer" id="stepViewer">
+      <div class="empty-state">
+        <div class="icon">🔍</div>
+        <p>Open a trace file to begin inspecting agent execution.</p>
+        <p style="margin-top:8px;font-size:0.9em;">Click <strong>"Open Trace File"</strong> in the header to load a .json trace.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Timeline -->
+  <div id="tab-timeline" class="tab-content">
+    <div class="step-viewer" id="timelineViewer">
+      <div class="empty-state">
+        <div class="icon">📊</div>
+        <p>Timeline view will appear once a trace is loaded.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Summary -->
+  <div id="tab-summary" class="tab-content">
+    <div class="step-viewer" id="summaryViewer">
+      <div class="empty-state">
+        <div class="icon">📋</div>
+        <p>Summary statistics will appear once a trace is loaded.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentTrace = null;
+let currentStep = 0;
+const STORE_KEY = 'agentdebug_recent_traces';
+
+// File loader
+document.getElementById('traceFile').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const trace = JSON.parse(ev.target.result);
+      loadTrace(trace, file.name);
+    } catch (err) {
+      alert('Invalid trace file: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+});
+
+function loadTrace(trace, name) {
+  currentTrace = trace;
+  currentStep = 0;
+  
+  // Add to recent traces
+  const select = document.getElementById('traceSelect');
+  const opt = document.createElement('option');
+  opt.value = name;
+  opt.textContent = (trace.agent_name || 'unknown') + ' — ' + (trace.trace_id || '').substr(0, 8) + ' (' + (trace.steps || []).length + ' steps)';
+  select.insertBefore(opt, select.firstChild);
+  select.value = name;
+  
+  // Save to localStorage
+  const recent = JSON.parse(localStorage.getItem(STORE_KEY) || '[]');
+  recent.unshift({name: name, data: trace});
+  localStorage.setItem(STORE_KEY, JSON.stringify(recent.slice(0, 10)));
+  
+  renderMeta();
+  renderStep();
+  renderTimeline();
+  renderSummary();
+  enableControls();
+}
+
+function renderMeta() {
+  if (!currentTrace) return;
+  document.getElementById('metaPanel').style.display = 'block';
+  
+  const steps = currentTrace.steps || [];
+  const meta = currentTrace.metadata || {};
+  const toolCalls = steps.reduce((sum, s) => sum + (s.tool_calls || []).length, 0);
+  
+  document.getElementById('metaTitle').textContent = '🔍 ' + (currentTrace.agent_name || 'Unknown Agent');
+  document.getElementById('metaGrid').innerHTML = [
+    {label: 'Trace ID', value: (currentTrace.trace_id || '').substr(0, 12) + '...'},
+    {label: 'Steps', value: steps.length},
+    {label: 'Tool Calls', value: toolCalls},
+    {label: 'Duration', value: (meta.total_duration_ms || 0) + 'ms'},
+    {label: 'Model', value: meta.model || 'N/A'},
+    {label: 'Tokens', value: meta.token_count || 0},
+  ].map(m => '<div class="meta-item"><div class="value">' + m.value + '</div><div class="label">' + m.label + '</div></div>').join('');
+  
+  document.getElementById('progressText').textContent = '0 / ' + steps.length;
+}
+
+function renderStep() {
+  const viewer = document.getElementById('stepViewer');
+  if (!currentTrace || !currentTrace.steps || currentTrace.steps.length === 0) {
+    viewer.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>No steps in this trace.</p></div>';
+    return;
+  }
+  
+  const steps = currentTrace.steps;
+  if (currentStep < 0) currentStep = 0;
+  if (currentStep >= steps.length) currentStep = steps.length - 1;
+  
+  const step = steps[currentStep];
+  if (!step) {
+    viewer.innerHTML = '<div class="empty-state"><p>Step not found.</p></div>';
+    return;
+  }
+  
+  const phase = step.phase || 'unknown';
+  const phaseLabel = phase.replace('_', ' ').toUpperCase();
+  const stepIdx = step.step_index || (currentStep + 1);
+  const thought = step.thought || '';
+  const input = step.input;
+  const toolCalls = step.tool_calls || [];
+  const subagentState = step.subagent_state;
+  
+  let html = '<div class="step-header"><span><span class="phase-badge phase-' + phase + '">' + phaseLabel + '</span> Step ' + stepIdx + '</span><span>' + (step.timestamp || '') + '</span></div><div class="step-body">';
+  
+  if (thought) {
+    html += '<div class="thought-box"><strong>💭 Thought:</strong><br>' + escapeHtml(thought) + '</div>';
+  }
+  
+  if (input) {
+    html += '<details><summary>📥 Input</summary><pre>' + escapeHtml(JSON.stringify(input, null, 2)) + '</pre></details>';
+  }
+  
+  if (toolCalls.length > 0) {
+    html += '<div style="margin-top:8px;"><strong>🛠 Tool Calls (' + toolCalls.length + '):</strong></div>';
+    toolCalls.forEach(function(tc) {
+      html += '<div class="tool-call-box"><div class="name">🛠 ' + (tc.tool || 'unknown') + ' <span class="duration">' + (tc.duration_ms || 0) + 'ms</span></div>';
+      html += '<details><summary>Arguments</summary><pre>' + escapeHtml(JSON.stringify(tc.arguments || {}, null, 2)) + '</pre></details>';
+      if (tc.result) {
+        html += '<details><summary>Result</summary><pre>' + escapeHtml(JSON.stringify(tc.result, null, 2)) + '</pre></details>';
+      }
+      html += '</div>';
+    });
+  }
+  
+  if (subagentState) {
+    html += '<details><summary>🧩 Subagent State</summary><pre>' + escapeHtml(JSON.stringify(subagentState, null, 2)) + '</pre></details>';
+  }
+  
+  html += '</div>';
+  viewer.innerHTML = html;
+  
+  document.getElementById('stepInput').value = currentStep + 1;
+  document.getElementById('progressText').textContent = (currentStep + 1) + ' / ' + steps.length;
+  updateButtonStates();
+}
+
+function renderTimeline() {
+  const viewer = document.getElementById('timelineViewer');
+  if (!currentTrace || !currentTrace.steps || currentTrace.steps.length === 0) {
+    viewer.innerHTML = '<div class="empty-state"><div class="icon">📊</div><p>No trace loaded.</p></div>';
+    return;
+  }
+  
+  const steps = currentTrace.steps;
+  let html = '<div style="padding:16px;"><h3 style="color:var(--accent2);margin-bottom:12px;">Execution Timeline</h3>';
+  
+  steps.forEach(function(step, i) {
+    const phase = step.phase || 'unknown';
+    const phaseLabel = phase.replace('_', ' ').toUpperCase();
+    const stepIdx = step.step_index || (i + 1);
+    const toolCalls = step.tool_calls || [];
+    const toolStr = toolCalls.length > 0 ? ' 🛠' + toolCalls.length : '';
+    
+    html += '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);cursor:pointer;" onclick="goToStep(' + i + ')">';
+    html += '<span class="phase-badge phase-' + phase + '">' + phaseLabel + '</span>';
+    html += '<span style="font-weight:600;">Step ' + stepIdx + '</span>';
+    html += '<span style="color:var(--text2);font-size:0.85em;">' + (step.thought ? step.thought.substr(0, 60) + '...' : '') + '</span>';
+    html += '<span style="margin-left:auto;color:var(--text2);font-size:0.85em;">' + toolStr + '</span>';
+    html += '</div>';
+  });
+  
+  html += '</div>';
+  viewer.innerHTML = html;
+}
+
+function renderSummary() {
+  const viewer = document.getElementById('summaryViewer');
+  if (!currentTrace || !currentTrace.steps) {
+    viewer.innerHTML = '<div class="empty-state"><div class="icon">📋</div><p>No trace loaded.</p></div>';
+    return;
+  }
+  
+  const steps = currentTrace.steps;
+  const meta = currentTrace.metadata || {};
+  let toolUsage = {};
+  let totalToolCalls = 0;
+  
+  steps.forEach(function(step) {
+    (step.tool_calls || []).forEach(function(tc) {
+      const name = tc.tool || 'unknown';
+      toolUsage[name] = (toolUsage[name] || 0) + 1;
+      totalToolCalls++;
+    });
+  });
+  
+  let html = '<div style="padding:16px;">';
+  html += '<h3 style="color:var(--accent2);margin-bottom:12px;">Execution Summary</h3>';
+  
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px;">';
+  [
+    {label: 'Total Steps', value: steps.length},
+    {label: 'Tool Calls', value: totalToolCalls},
+    {label: 'Duration', value: (meta.total_duration_ms || 0) + 'ms'},
+    {label: 'Tokens', value: meta.token_count || 0},
+    {label: 'Model', value: meta.model || 'N/A'},
+    {label: 'Status', value: meta.status || 'completed'},
+  ].forEach(function(item) {
+    html += '<div style="background:var(--surface2);border-radius:8px;padding:12px;text-align:center;"><div style="font-size:1.4em;font-weight:700;color:var(--accent);">' + item.value + '</div><div style="font-size:0.8em;color:var(--text2);margin-top:4px;">' + item.label + '</div></div>';
+  });
+  html += '</div>';
+  
+  if (Object.keys(toolUsage).length > 0) {
+    html += '<h4 style="color:var(--accent);margin:12px 0 8px;">Tool Usage</h4><div style="display:flex;flex-wrap:wrap;gap:8px;">';
+    Object.entries(toolUsage).forEach(function(entry) {
+      html += '<span style="background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:4px 10px;font-size:0.9em;">🛠 ' + entry[0] + ': <strong>' + entry[1] + 'x</strong></span>';
+    });
+    html += '</div>';
+  }
+  
+  if (currentTrace.output) {
+    html += '<details style="margin-top:16px;"><summary style="cursor:pointer;color:var(--text2);">📤 Final Output</summary><pre>' + escapeHtml(JSON.stringify(currentTrace.output, null, 2)) + '</pre></details>';
+  }
+  
+  html += '</div>';
+  viewer.innerHTML = html;
+}
+
+function enableControls() {
+  document.getElementById('btnFirst').disabled = false;
+  document.getElementById('btnBack').disabled = false;
+  document.getElementById('btnForward').disabled = false;
+  document.getElementById('btnLast').disabled = false;
+  document.getElementById('btnGo').disabled = false;
+}
+
+function updateButtonStates() {
+  const steps = currentTrace ? (currentTrace.steps || []).length : 0;
+  document.getElementById('btnFirst').disabled = currentStep <= 0;
+  document.getElementById('btnBack').disabled = currentStep <= 0;
+  document.getElementById('btnForward').disabled = currentStep >= steps - 1;
+  document.getElementById('btnLast').disabled = currentStep >= steps - 1;
+}
+
+function goToStep(idx) {
+  currentStep = idx;
+  renderStep();
+}
+
+// Controls
+document.getElementById('btnFirst').addEventListener('click', function() { currentStep = 0; renderStep(); });
+document.getElementById('btnBack').addEventListener('click', function() { if (currentStep > 0) { currentStep--; renderStep(); } });
+document.getElementById('btnForward').addEventListener('click', function() { if (currentTrace && currentStep < currentTrace.steps.length - 1) { currentStep++; renderStep(); } });
+document.getElementById('btnLast').addEventListener('click', function() { if (currentTrace) { currentStep = currentTrace.steps.length - 1; renderStep(); } });
+document.getElementById('stepInput').addEventListener('change', function() {
+  const val = parseInt(this.value);
+  if (currentTrace && val >= 1 && val <= currentTrace.steps.length) {
+    currentStep = val - 1;
+    renderStep();
+  }
+});
+document.getElementById('btnGo').addEventListener('click', function() {
+  document.getElementById('stepInput').dispatchEvent(new Event('change'));
+});
+
+// Tab switching
+document.querySelectorAll('.tab').forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('.tab-content').forEach(function(tc) { tc.classList.remove('active'); });
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+function escapeHtml(text) {
+  if (text === null || text === undefined) return '';
+  return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || !currentTrace) return;
+  if (e.key === 'ArrowRight' || e.key === ' ') {
+    if (currentStep < currentTrace.steps.length - 1) { currentStep++; renderStep(); e.preventDefault(); }
+  }
+  if (e.key === 'ArrowLeft') {
+    if (currentStep > 0) { currentStep--; renderStep(); e.preventDefault(); }
+  }
+  if (e.key === 'Home') { currentStep = 0; renderStep(); e.preventDefault(); }
+  if (e.key === 'End') { currentStep = currentTrace.steps.length - 1; renderStep(); e.preventDefault(); }
+});
+</script>
+</body>
+</html>
